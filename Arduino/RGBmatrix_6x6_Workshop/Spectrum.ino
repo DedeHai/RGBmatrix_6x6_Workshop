@@ -37,7 +37,11 @@ void spectrumsetup() {
   ADMUX  = ANALOG_PIN | _BV(REFS1)| _BV(REFS0); //right adjust, use internal voltage reference (1.2V)                                                                                                                                                                                                                                                                                                                                           as ref
   ADCSRA = _BV(ADEN)  |  _BV(ADSC)  |  _BV(ADATE) |  _BV(ADIE)  |  _BV(ADPS2) | _BV(ADPS1);// prescaler: 64, 13 clocks to sample so: 16MHz/64 / 13 = 19.2 kHz
   ADCSRB = 0;     //no triggering
-  //DIDR0  = 1 << ANALOG_PIN; //no digital input
+  pinMode(MICPIN_VCC,OUTPUT); //+5V for microphone
+  digitalWrite(MICPIN_VCC, HIGH); //set it high (5V)
+  pinMode(MICPIN_GND,OUTPUT); //GND for microphone
+  digitalWrite(MICPIN_GND, LOW); //set it low (GND)
+  
   TIMSK0 = 0;    // Timer0 off, dont forget to switch on afterwards! will disable millis() and other stuff to work properly
   sei(); //interrupts on
   

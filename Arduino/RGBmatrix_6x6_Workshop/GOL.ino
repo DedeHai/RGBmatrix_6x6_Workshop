@@ -15,9 +15,9 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
 
-
- GameOfLife.c - cellular automat based on Conways Game of life
+ GameOfLife - cellular automat based on Conways Game of life
  with added color 'genetics'
  
  Created by Damian Schneider, March 12th, 2013.

@@ -18,19 +18,19 @@
 
 /*
 
-Program for the 6x6 pixels RGB matrix using my Pixelmatrix library.
-
-It supports a microphone for spectrum display and an RTC clock to display time.
-The font display supports scrolling of a string, so any message can be displayed. For long messages, it may need to be modified to a single color per char.
-GOL is the Conways game of life with added color-genetics.
-Spectrum displays the audio frequency spectrum read from the microphone using Fourier Transformation.
-Colorfade contains functions to fade colors of pixels.
-Fire displays a digital random fire based on an algorithm.
-Heat is a simplified finite-elements-simulation of the physics of heat transfer.
-Rainbow was initially a color test function making use of the color fade functions to display a nice color spectrum.
-
-https://github.com/DedeHai/
-
+ Program for the 6x6 pixels RGB matrix using my Pixelmatrix library.
+ 
+ It supports a microphone for spectrum display and an RTC clock to display time.
+ The font display supports scrolling of a string, so any message can be displayed. For long messages, it may need to be modified to a single color per char.
+ GOL is the Conways game of life with added color-genetics.
+ Spectrum displays the audio frequency spectrum read from the microphone using Fourier Transformation.
+ Colorfade contains functions to fade colors of pixels.
+ Fire displays a digital random fire based on an algorithm.
+ Heat is a simplified finite-elements-simulation of the physics of heat transfer.
+ Rainbow was initially a color test function making use of the color fade functions to display a nice color spectrum.
+ 
+ https://github.com/DedeHai/
+ 
  */
 
 
@@ -48,14 +48,15 @@ https://github.com/DedeHai/
 #define BUTTONPIN_A 8 //primärer schalter an diesem pin
 #define BUTTONPIN_B 9 //sekundärer schalter an diesem pin
 #define BUTTON_GND 10 //ground für die buttons an diesem pin
-#define BAUDRATE 115200
+
+#define MICPIN_VCC 15 //5V pin für mikrofon (A1)
+#define MICPIN_GND 16 //GND pin für mikrofon (A2)
+
+#define BAUDRATE 115200 //Serial in/out
 
 RGBpixelmatrix pixelmatrix(WIDTH, HEIGHT); //create a RGBpixelmatrix, output on pin7
-RGB colorbuffer1[WIDTH][HEIGHT]; //erster
-RGB colorbuffer2[WIDTH][HEIGHT]; 
-//definition of tetris block
-
-
+RGB colorbuffer1[WIDTH][HEIGHT]; //primärer buffer für fading
+RGB colorbuffer2[WIDTH][HEIGHT]; //sekundärer buffer für fading
 
 volatile uint8_t modechangerequest = 0; //volatile, is changed in interrupt
 uint8_t initmode = 1;
@@ -65,21 +66,26 @@ char string[16];// = "~Pixelmatrix~";
 void setup()
 {
   buttonSetup();
-  Serial.begin(BAUDRATE);
 
-//setup RTC 
+
+
+//  Serial.begin(BAUDRATE);
+
+  //setup RTC 
   setSyncProvider(RTC.get);   // the function to get the time from the RTC
-//  if(timeStatus() != timeSet) 
-//    Serial.println("Unable to sync with the RTC");
-//  else
-//    Serial.println("RTC has set the system time");     
-  setSyncInterval(60);    //zeit alle 60 sekunden synchronisieren mit RTC
-  
-  randomSeed(analogRead(A1)); //read some noise from analog input to seed the random generator
+  /*
+  if(timeStatus() != timeSet) 
+    Serial.println("Unable to sync with the RTC");
+  else
+    Serial.println("RTC has set the system time");   
+  */  
+  setSyncInterval(60);    //zeit alle 60 sekunden synchronisieren mit RTC modul
+
+  randomSeed(analogRead(A0)); //read some audio noise from analog input to seed the random generator
   mode = random(6);
   pixelmatrix.clear();
-  
-  Serial.println("6x6 Pixelmatrix OK");
+
+//  Serial.println("6x6 Pixelmatrix");
 }                    
 
 void loop()
@@ -92,11 +98,11 @@ void loop()
 
     similarcolors(); //fade each pixel to similar color at random speed
     pixelmatrix.sendColors();
-        delay(5);
+    delay(5);
     if (modechangerequest == 1) //mode will change, fade to black
     {
       pixelmatrix.clear();
-       delay(100);
+      delay(100);
       modechangerequest = 0;
       initmode = 1;
       mode = (mode + 1);
@@ -108,8 +114,8 @@ void loop()
     pixelmatrix.sendColors();
     if (modechangerequest == 1) //mode will change, fade to black
     {
-       pixelmatrix.clear();
-       delay(100);
+      pixelmatrix.clear();
+      delay(100);
       modechangerequest = 0;
       initmode = 1;
       mode = (mode + 1);
@@ -124,7 +130,7 @@ void loop()
     if (modechangerequest == 1) //mode will change, fade to black
     {
       pixelmatrix.clear();
-       delay(100);
+      delay(100);
       modechangerequest = 0;
       initmode = 1;
       mode = (mode + 1);
@@ -139,7 +145,7 @@ void loop()
     if (modechangerequest == 1) //mode will change, fade to black
     {
       pixelmatrix.clear();
-       delay(100);
+      delay(100);
       modechangerequest = 0;
       initmode = 1;
       mode = (mode + 1);
@@ -163,7 +169,7 @@ void loop()
     if (modechangerequest == 1) //mode will change, fade to black
     {
       pixelmatrix.clear();
-       delay(100);
+      delay(100);
       modechangerequest = 0;
       initmode = 1;
       mode = (mode + 1);
@@ -187,7 +193,7 @@ void loop()
       //set interrupts back to normal: 
       spectrumcleanup();
       pixelmatrix.clear();
-       delay(100);
+      delay(100);
       modechangerequest = 0;
       initmode = 1;
       mode = (mode + 1);
@@ -197,7 +203,7 @@ void loop()
   case 6:
     RGB fontcolor;
     RGB strcolors[sizeof(string)];
-   // sprintf(string, "%.2d:%.2d:%.2d ", hour(), minute(), second());
+    // sprintf(string, "%.2d:%.2d:%.2d ", hour(), minute(), second());
     sprintf(string, "%.2d:%.2d ", hour(), minute());
     fontcolor =  pixelmatrix.HSVtoRGB(random(255),190,250);
     for(byte i = 0; i<sizeof(string); i++)
@@ -226,13 +232,13 @@ void loop()
 
 
   case 7:
-     fire();
-     pixelmatrix.sendColors();
+    fire();
+    pixelmatrix.sendColors();
 
     if (modechangerequest == 1) //mode will change, fade to black
     {
       pixelmatrix.clear();
-       delay(100);
+      delay(100);
       modechangerequest = 0;
       initmode = 1;
       mode = (mode + 1);
@@ -241,15 +247,15 @@ void loop()
 
 
   case 8:
-    
-     gameOfLife();
-     
-     pixelmatrix.sendColors();
+
+    gameOfLife();
+
+    pixelmatrix.sendColors();
 
     if (modechangerequest == 1) //mode will change, fade to black
     {
       pixelmatrix.clear();
-       delay(100);
+      delay(100);
       modechangerequest = 0;
       initmode = 1;
       mode = (mode + 1);
@@ -264,6 +270,7 @@ void loop()
 
 
 }
+
 
 
 
