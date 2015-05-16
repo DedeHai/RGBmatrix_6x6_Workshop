@@ -54,6 +54,8 @@
 
 #define BAUDRATE 115200 //Serial in/out
 
+//#define RANDOMCHANGEINTERVAL 1200000UL //time in milliseconds to change program randomly (uncomment to activate)
+
 RGBpixelmatrix pixelmatrix(WIDTH, HEIGHT); //create a RGBpixelmatrix, output on pin7
 RGB colorbuffer1[WIDTH][HEIGHT]; //primärer buffer für fading
 RGB colorbuffer2[WIDTH][HEIGHT]; //sekundärer buffer für fading
@@ -69,27 +71,34 @@ void setup()
 
 
 
-//  Serial.begin(BAUDRATE);
+  //  Serial.begin(BAUDRATE);
 
   //setup RTC 
   setSyncProvider(RTC.get);   // the function to get the time from the RTC
   /*
   if(timeStatus() != timeSet) 
-    Serial.println("Unable to sync with the RTC");
-  else
-    Serial.println("RTC has set the system time");   
-  */  
+   Serial.println("Unable to sync with the RTC");
+   else
+   Serial.println("RTC has set the system time");   
+   */
   setSyncInterval(60);    //zeit alle 60 sekunden synchronisieren mit RTC modul
 
   randomSeed(analogRead(A0)); //read some audio noise from analog input to seed the random generator
   mode = random(6);
   pixelmatrix.clear();
-
-//  Serial.println("6x6 Pixelmatrix");
+  //  Serial.println("6x6 Pixelmatrix");
 }                    
 
 void loop()
 {
+#ifdef RANDOMCHANGEINTERVAL
+  static unsigned long intervaltimestamp = millis();
+  if((millis() - intervaltimestamp) > (RANDOMCHANGEINTERVAL))
+  {
+    intervaltimestamp = millis();
+    modechangerequest = 1; 
+  }
+#endif
 
   switch (mode) {
 
@@ -270,6 +279,8 @@ void loop()
 
 
 }
+
+
 
 
 
