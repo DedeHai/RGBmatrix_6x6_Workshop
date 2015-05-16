@@ -84,7 +84,7 @@ void setup()
   setSyncInterval(60);    //zeit alle 60 sekunden synchronisieren mit RTC modul
 
   randomSeed(analogRead(A0)); //read some audio noise from analog input to seed the random generator
-  mode = random(6);
+  mode = random(9);
   pixelmatrix.clear();
   //  Serial.println("6x6 Pixelmatrix");
 }                    
@@ -95,8 +95,16 @@ void loop()
   static unsigned long intervaltimestamp = millis();
   if((millis() - intervaltimestamp) > (RANDOMCHANGEINTERVAL))
   {
-    intervaltimestamp = millis();
+    
+    if(initmode == 1)
+    {
+      intervaltimestamp = millis();
+      mode = random(9);
+    }
+    else
+    {
     modechangerequest = 1; 
+    }
   }
 #endif
 
@@ -196,6 +204,16 @@ void loop()
     else
     {
       spectrumdisplay();
+      #ifdef RANDOMCHANGEINTERVAL
+        static unsigned long framecounter = 0;
+        framecounter++;
+        if(framecounter > (RANDOMCHANGEINTERVAL/20)) //approx. 50 fps
+        {
+         framecounter = 0;
+         modechangerequest = 1; 
+        }
+      #endif
+      
     }
     if (modechangerequest == 1) //mode will change, fade to black
     {
