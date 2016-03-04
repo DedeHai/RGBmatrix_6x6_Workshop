@@ -35,12 +35,13 @@
 
 
 
-#include "RGBpixelmatrix.h" //Pixel Matrix library
+#include <RGBpixelmatrix.h> //Pixel Matrix library
 #include <util/delay.h>
 #include <DS3232RTC.h>    //http://github.com/JChristensen/DS3232RTC
 #include <Time.h>         //http://www.arduino.cc/playground/Code/Time  
 #include <Wire.h>         //http://arduino.cc/en/Reference/Wire (included with Arduino IDE)
 #include "blocks.h" //struct definition of tetris block
+
 
 #define WIDTH 6//matrix has 6 columns (direction of led strip ) number of leds per strip)
 #define HEIGHT 6 //and 6 lines (number of led strips)
@@ -54,7 +55,7 @@
 
 #define BAUDRATE 115200 //Serial in/out
 
-//#define RANDOMCHANGEINTERVAL 1200000UL //time in milliseconds to change program randomly (uncomment to activate)
+#define RANDOMCHANGEINTERVAL 1200000UL //time in milliseconds to change program randomly (uncomment to activate)
 
 RGBpixelmatrix pixelmatrix(WIDTH, HEIGHT); //create a RGBpixelmatrix, output on pin7
 RGB colorbuffer1[WIDTH][HEIGHT]; //primärer buffer für fading
@@ -71,10 +72,10 @@ void setup()
 
 
 
-  //  Serial.begin(BAUDRATE);
+  //Serial.begin(BAUDRATE);
 
   //setup RTC 
-  setSyncProvider(RTC.get);   // the function to get the time from the RTC
+  setSyncProvider(getRTCtime);   // the function to get the time from the RTC
   /*
   if(timeStatus() != timeSet) 
    Serial.println("Unable to sync with the RTC");
@@ -84,9 +85,9 @@ void setup()
   setSyncInterval(60);    //zeit alle 60 sekunden synchronisieren mit RTC modul
 
   randomSeed(analogRead(A0)); //read some audio noise from analog input to seed the random generator
-  mode = random(9);
+  mode = 6; //random(9);
   pixelmatrix.clear();
-  //  Serial.println("6x6 Pixelmatrix");
+ // Serial.println("6x6 Pixelmatrix");
 }                    
 
 void loop()
@@ -228,23 +229,7 @@ void loop()
     break;
 
   case 6:
-    RGB fontcolor;
-    RGB strcolors[sizeof(string)];
-    // sprintf(string, "%.2d:%.2d:%.2d ", hour(), minute(), second());
-    sprintf(string, "%.2d:%.2d ", hour(), minute());
-    fontcolor =  pixelmatrix.HSVtoRGB(random(255),190,250);
-    for(byte i = 0; i<sizeof(string); i++)
-    {
-      strcolors[i] = fontcolor;
-    }
-    RGB background;
-    background.r =255*0;
-    background.g =255*.05;
-    background.b= 255*0;
-
-
-    scrolltext(string, strcolors,  background); //function scrolls the text, returns when finished or on modechangerequest
-
+    displayClock();
     if (modechangerequest == 1) //mode will change, fade to black
     {
       pixelmatrix.clear();
