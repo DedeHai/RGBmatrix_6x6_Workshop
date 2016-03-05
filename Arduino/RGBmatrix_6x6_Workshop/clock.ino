@@ -19,7 +19,7 @@
 //Die Uhr stellt automatisch zwischen Sommer- und Winterzeit um (europäische sommerzeit)
 
 
-#define TIMEZONE 1
+#define TIMEZONE 1 //GMT +1
 
 //check if the input is in european summer or winter time (daylight saving time checker)
 boolean isSummertime(tmElements_t &tm)
@@ -44,7 +44,7 @@ boolean isSummertime(tmElements_t &tm)
 
 void displayClock()
 {
-  static uint8_t backgroundhue = 0;
+  static uint8_t backgroundhue = random(255);
   RGB strcolors[sizeof(string)];
 
   sprintf(string, "%.2d:%.2d ", hour(), minute());
@@ -53,7 +53,7 @@ void displayClock()
   for (byte i = 0; i < sizeof(string); i++)
   {
     strcolors[i] = pixelmatrix.HSVtoRGB(fonthue, 250, 250);
-    fonthue+=5;
+    fonthue+=9;
   }
 
 

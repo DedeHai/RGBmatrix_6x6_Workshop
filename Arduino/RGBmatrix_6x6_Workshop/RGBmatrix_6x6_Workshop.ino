@@ -85,7 +85,7 @@ void setup()
   setSyncInterval(60);    //zeit alle 60 sekunden synchronisieren mit RTC modul
 
   randomSeed(analogRead(A0)); //read some audio noise from analog input to seed the random generator
-  mode = 6; //random(9);
+  mode = random(9);
   pixelmatrix.clear();
  // Serial.println("6x6 Pixelmatrix");
 }                    
