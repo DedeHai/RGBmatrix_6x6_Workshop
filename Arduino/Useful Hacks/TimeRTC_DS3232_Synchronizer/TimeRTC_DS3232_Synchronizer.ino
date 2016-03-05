@@ -32,6 +32,7 @@ RTC synchronizer:
  *    day is 1-31,                                                      *
  *    hour is 0-23, and                                                 *
  *    minute and second are 0-59.   
+ *    example: 2016,3,4,11,43,15
  */
 
 #include <DS3232RTC.h>    //http://github.com/JChristensen/DS3232RTC
